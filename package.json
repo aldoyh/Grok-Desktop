@@ -5,6 +5,9 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "test": "npm run test:e2e",
+    "test:e2e": "node e2e/capture-screenshots.js",
+    "docs:screenshots": "node e2e/capture-screenshots.js",
     "build": "npx --yes electron-builder@latest --win --x64",
     "pack": "npx --yes electron-builder@latest --dir",
     "build-portable": "npx --yes electron-builder@latest --win portable",
@@ -29,7 +32,8 @@
     "electron-tabs": "^1.0.4"
   },
   "devDependencies": {
-    "electron": "^39.1.2"
+    "electron": "^39.1.2",
+    "playwright": "^1.55.0"
   },
   "overrides": {
     "form-data": "4.0.4",

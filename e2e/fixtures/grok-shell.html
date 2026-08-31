@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark light">
+  <title>Grok</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #111113;
+      --rail: #18181b;
+      --fg: #f4f4f5;
+      --muted: #a1a1aa;
+      --line: #27272a;
+      --pill: #1f1f23;
+      --chip: transparent;
+      --chip-border: #3f3f46;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --rail: #f4f4f5;
+        --fg: #18181b;
+        --muted: #52525b;
+        --line: #e4e4e7;
+        --pill: #ffffff;
+        --chip: #ffffff;
+        --chip-border: #d4d4d8;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      height: 100%;
+    }
+    .rail {
+      background: var(--rail);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 8px;
+    }
+    .mark, .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .mark {
+      background: var(--fg);
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 40px 24px 80px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 34px;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+    }
+    .prompt {
+      width: min(680px, 92%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--pill);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 14px 18px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .prompt .grow { flex: 1; }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .chip {
+      border: 1px solid var(--chip-border);
+      background: var(--chip);
+      color: var(--fg);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="rail" aria-hidden="true">
+      <div class="mark">G</div>
+      <div class="icon">⌕</div>
+      <div class="icon">✎</div>
+      <div class="icon">☰</div>
+    </aside>
+    <main class="stage">
+      <div class="brand">Grok</div>
+      <div class="prompt">
+        <span class="grow">What do you want to know?</span>
+        <span>Auto</span>
+      </div>
+      <div class="chips">
+        <span class="chip">DeepSearch</span>
+        <span class="chip">Create Image</span>
+        <span class="chip">Voice</span>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

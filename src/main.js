@@ -186,6 +186,76 @@ const path = require('path');
 let mainWindow;
 let aboutWindow;
 
+function themeFilePath() {
+  return path.join(app.getPath('userData'), 'theme.json');
+}
+
+function readThemePreference() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(themeFilePath(), 'utf8'));
+    if (parsed && parsed.theme === 'light') return 'light';
+  } catch (_) {}
+  return 'dark';
+}
+
+function writeThemePreference(theme) {
+  try {
+    fs.writeFileSync(themeFilePath(), JSON.stringify({ theme }));
+  } catch (err) {
+    console.warn('Grok Desktop: could not save theme preference:', err.message);
+  }
+}
+
+function currentTheme() {
+  return nativeTheme.themeSource === 'light' ? 'light' : 'dark';
+}
+
+function themeBackground(theme) {
+  return theme === 'light' ? '#ffffff' : '#1e1f22';
+}
+
+function applySchemeToWebContents(wc, scheme) {
+  if (!wc || (typeof wc.isDestroyed === 'function' && wc.isDestroyed())) return;
+  try {
+    if (typeof wc.setColorScheme === 'function') wc.setColorScheme(scheme);
+  } catch (_) {}
+  try {
+    if (wc.debugger && !wc.debugger.isAttached()) wc.debugger.attach('1.3');
+    if (wc.debugger && wc.debugger.isAttached()) {
+      wc.debugger.sendCommand('Emulation.setEmulatedMedia', {
+        features: [{ name: 'prefers-color-scheme', value: scheme }]
+      }).catch(() => {});
+    }
+  } catch (_) {}
+}
+
+function applyColorSchemeToAll() {
+  const scheme = currentTheme();
+  try {
+    webContents.getAllWebContents().forEach((wc) => {
+      const use = forcedLightWebContentsIds.has(wc.id) ? 'light' : scheme;
+      applySchemeToWebContents(wc, use);
+    });
+  } catch (_) {}
+}
+
+function sendTheme() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('system-theme-updated', currentTheme());
+  }
+}
+
+function applyAppTheme(theme) {
+  const next = theme === 'light' ? 'light' : 'dark';
+  nativeTheme.themeSource = next;
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    try { mainWindow.setBackgroundColor(themeBackground(next)); } catch (_) {}
+  }
+  sendTheme();
+  applyColorSchemeToAll();
+  return next;
+}
+
 // Allow autoplay without user gesture (for seamless audio playback)
 try { app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required'); } catch (_) {}
 
@@ -299,12 +369,19 @@ function toggleAlwaysOnTopLinux(mainWindow) {
 }
 
 function createWindow() {
+  const e2eMode = process.env.GROK_E2E === '1';
+  const initialTheme = e2eMode
+    ? (process.env.GROK_E2E_THEME === 'light' ? 'light' : 'dark')
+    : readThemePreference();
+  applyAppTheme(initialTheme);
+
   // Create the browser window
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    backgroundColor: themeBackground(initialTheme),
     webPreferences: {
       nodeIntegration: true, // Enable Node.js integration
       contextIsolation: false, // Disable context isolation for this use case
@@ -320,8 +397,16 @@ function createWindow() {
   // Ensure shortcuts work when focus is on the main window UI
   try { attachShortcutHandlers(mainWindow.webContents); } catch (_) {}
 
-  // Load the index.html file
-  mainWindow.loadFile(path.join(__dirname, '../index.html'));
+  const loadOptions = { query: { theme: initialTheme } };
+  if (e2eMode) {
+    loadOptions.query.e2e = '1';
+    loadOptions.query.start = process.env.GROK_E2E_START_URL || 'https://grok.com';
+    mainWindow.setSize(1280, 800);
+    mainWindow.center();
+    mainWindow.show();
+  }
+
+  mainWindow.loadFile(path.join(__dirname, '../index.html'), loadOptions);
 
   // Configure spellchecker languages for default session and webview partition
   try {
@@ -349,28 +434,7 @@ function createWindow() {
     }
   } catch (_) {}
 
-  // Send initial theme and listen for OS theme changes
-  const sendTheme = () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('system-theme-updated', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
-    }
-  };
   sendTheme();
-  // Apply color scheme to all web contents (main and webviews)
-  const applyColorSchemeToAll = () => {
-    const scheme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
-    try {
-      webContents.getAllWebContents().forEach((wc) => {
-        if (typeof wc.setColorScheme === 'function') {
-          if (forcedLightWebContentsIds.has(wc.id)) {
-            wc.setColorScheme('light');
-          } else {
-            wc.setColorScheme(scheme);
-          }
-        }
-      });
-    } catch (_) {}
-  };
   applyColorSchemeToAll();
 
   nativeTheme.on('updated', () => {
@@ -401,24 +465,13 @@ function createWindow() {
   // Set up keyboard shortcuts (Ctrl+T, Ctrl+Tab, Ctrl+R)
   setupKeyboardShortcuts();
 
-  // Ensure newly created webContents/webviews get correct color scheme
+  // Ensure newly created webContents/webviews get the app theme (dark by default)
   app.on('web-contents-created', (_event, contents) => {
-    const scheme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
-    if (typeof contents.setColorScheme === 'function') {
-      if (forcedLightWebContentsIds.has(contents.id)) {
-        contents.setColorScheme('light');
-      } else {
-        contents.setColorScheme(scheme);
-      }
-    }
+    const scheme = forcedLightWebContentsIds.has(contents.id) ? 'light' : currentTheme();
+    applySchemeToWebContents(contents, scheme);
     contents.on('did-attach-webview', (_e, wc) => {
-      if (wc && typeof wc.setColorScheme === 'function') {
-        if (forcedLightWebContentsIds.has(wc.id)) {
-          wc.setColorScheme('light');
-        } else {
-          wc.setColorScheme(scheme);
-        }
-      }
+      const webviewScheme = forcedLightWebContentsIds.has(wc.id) ? 'light' : currentTheme();
+      applySchemeToWebContents(wc, webviewScheme);
     });
   });
 }
@@ -492,6 +545,16 @@ function setupIpcHandlers() {
     }
   });
 
+  ipcMain.handle('get-theme', () => currentTheme());
+
+  ipcMain.handle('set-theme', (_event, theme) => {
+    const next = applyAppTheme(theme);
+    if (process.env.GROK_E2E !== '1') {
+      writeThemePreference(next);
+    }
+    return next;
+  });
+
   // Open About page in a new tab instead of a window
   ipcMain.handle('show-app-info', async () => {
     const name = typeof app.getName === 'function' ? app.getName() : 'Grok Desktop';
@@ -513,6 +576,14 @@ function setupIpcHandlers() {
     const contactUrl = 'https://github.com/AnRkey/Grok-Desktop/discussions';
     urlObj.searchParams.set('developer', developer);
     urlObj.searchParams.set('contact', contactUrl);
+    urlObj.searchParams.set('maintainer', 'Hasan AlDoy');
+    urlObj.searchParams.set('maintainerRepo', 'https://github.com/aldoyh');
+    urlObj.searchParams.set('aiAgent', 'Antigravity');
+    urlObj.searchParams.set('aiAgentUrl', 'https://deepmind.google/');
+    urlObj.searchParams.set('electron', process.versions.electron || '');
+    urlObj.searchParams.set('chrome', process.versions.chrome || '');
+    urlObj.searchParams.set('node', process.versions.node || '');
+    urlObj.searchParams.set('platform', `${process.platform} (${process.arch})`);
 
     // Send the URL to the renderer to create a new tab
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -593,25 +664,10 @@ function setupIpcHandlers() {
       if (!wc) return false;
       if (shouldForceLight) {
         forcedLightWebContentsIds.add(wcId);
-        if (typeof wc.setColorScheme === 'function') wc.setColorScheme('light');
-        // Stronger override via DevTools Protocol: emulate prefers-color-scheme: light
-        try {
-          if (!wc.debugger.isAttached()) wc.debugger.attach('1.3');
-          wc.debugger.sendCommand('Emulation.setEmulatedMedia', {
-            features: [{ name: 'prefers-color-scheme', value: 'light' }]
-          });
-        } catch (_) {}
+        applySchemeToWebContents(wc, 'light');
       } else {
         forcedLightWebContentsIds.delete(wcId);
-        const scheme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
-        if (typeof wc.setColorScheme === 'function') wc.setColorScheme(scheme);
-        // Remove emulation
-        try {
-          if (wc.debugger.isAttached()) {
-            wc.debugger.sendCommand('Emulation.setEmulatedMedia', { features: [] });
-            wc.debugger.detach();
-          }
-        } catch (_) {}
+        applySchemeToWebContents(wc, currentTheme());
       }
       return true;
     } catch (_) {

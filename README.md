@@ -3,8 +3,39 @@
 ## Description
 Grok-Desktop is an Electron-based desktop application for Windows 10/11 and Linux that wraps `grok.com`, providing desktop-application-like access to Grok with real-time API usage monitoring, multi-tab support, and seamless authentication for xAI, Google, and Apple accounts.
 
-## Screenshot
-![Screenshot](screenshot.png)
+## Screenshots
+
+![Grok Desktop](screenshot.png)
+
+*Logged-in Grok session in the desktop shell, with the usage bar at the bottom.*
+
+### Tab bar
+
+![Tab bar and toolbar](docs/screenshots/03-toolbar.png)
+
+Reload, Always-on-Top, usage stats (`s`), and About (`i`).
+
+### Usage monitoring
+
+![Usage stats bar](docs/screenshots/02-usage-bar.png)
+
+![Usage warning](docs/screenshots/08-usage-warning.png)
+
+![Usage critical](docs/screenshots/09-usage-critical.png)
+
+Green/normal, orange warning (≤25% remaining), and red critical (≤10% remaining), plus refill time.
+
+### About, always-on-top, and live grok.com
+
+![About tab](docs/screenshots/06-about.png)
+
+![Always-on-top active](docs/screenshots/07-aot-active.png)
+
+![Live grok.com](docs/screenshots/12-live-grok.png)
+
+![Light theme](docs/screenshots/10-light-mode.png)
+
+Full catalog: [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md). Regenerate with `npm run test:e2e`.
 
 ## Features
 - **Desktop application wrapper** for grok.com
@@ -24,7 +55,7 @@ Grok-Desktop is an Electron-based desktop application for Windows 10/11 and Linu
 - **Authentication support** for xAI, Google, and Apple accounts
 - **Clean interface** with no menu bar for distraction-free usage
 - **Always-on-top function** with cross-platform support (Windows & Linux)
-- **Dark/Light mode support** with system theme detection
+- **Dark mode by default**; light mode is optional from the **D** / **L** toolbar button
 - **Grok speech mode** support
 - **Enhanced security** with domain validation and OAuth protection
 
@@ -78,48 +109,14 @@ Grok-Desktop/
 ├── index.html            # Main application HTML
 ├── styles.css            # Application styles
 ├── about.html            # About dialog HTML
+├── e2e/                  # Screenshot E2E tour
+├── docs/screenshots/     # Captured UI screenshots
 ├── package.json          # Node.js dependencies and build config
 ├── build.bat             # Windows build script
-├── build-linux.sh        # Linux build script
 ├── CHANGELOG.md          # Version history and changes
-├── LINUX_BUILD_GUIDE.md  # Detailed Linux build instructions
-├── new_features.md       # Security features documentation
 └── README.md            # This file
 ```
 
-<<<<<<< HEAD
-## Build Grok-Desktop
-1. Install Node.js from [nodejs.org](https://nodejs.org/).
-2. Clone this repository or download the files.
-3. Install dependencies if needed: `npm install`
-4. Build using npm scripts:
-   - Directory build (unpacked): `npm run build-dir`
-   - Portable executable: `npm run build-portable`
-   - Full installers (NSIS + MSI): `npm run build-installer`
-
-Notes:
-- These scripts use `npx electron-builder@latest` (no global install required).
-- All build outputs are written to the `build` directory.
-
-## Usage
-- After building, install `Grok-Desktop` with `Grok-Desktop_Installer-v1.2.3.exe` from the `build` directory
-- Launch `Grok-Desktop` from the Start Menu
-- Log in via `grok.com`, using Google, Apple, or xAI authentication as needed.
-- Use the + button in the top toolbar (or Ctrl+T) to add new tabs.
-- Click the AOT button in the top right to toggle always-on-top functionality.
-- Use keyboard shortcuts to work faster:
-  - Ctrl+T: Open a new tab
-  - Ctrl+Tab / Ctrl+Shift+Tab: Cycle through open tabs (next/previous)
-  - Ctrl+R: Reload the currently active tab
-  - Ctrl+I: Show information/about dialog
-
-## Keyboard Shortcuts
-- Ctrl+T: Open a new tab
-- Ctrl+Tab: Switch to the next tab
-- Ctrl+Shift+Tab: Switch to the previous tab
-- Ctrl+R: Reload the active tab (does not reload the entire app window)
-- Ctrl+I: Show information/about dialog
-=======
 ## Building from Source
 
 ### Prerequisites
@@ -129,7 +126,6 @@ Notes:
 4. Install dependencies: `npm install`
 
 ### Build Commands
->>>>>>> development
 
 #### Windows
 ```bash
@@ -189,6 +185,7 @@ sudo dnf install ./Grok-Desktop-v1.2.5.x86_64.rpm
   - **+**: Create new tab
   - **↻**: Reload current tab
   - **AOT**: Toggle always-on-top mode
+  - **D** / **L**: Theme — dark by default, click for light
   - **s**: Toggle API usage statistics display
   - **👁**: Toggle Grok-4-Heavy stats visibility (eye icon)
   - **i**: Show about dialog
@@ -386,8 +383,20 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 git clone https://github.com/AnRkey/Grok-Desktop.git
 cd Grok-Desktop
 npm install
-npm start  # Run in development mode
+npm start       # Run in development mode
+npm run test:e2e  # Capture UI screenshots into docs/screenshots/
 ```
+
+## Testing
+
+Screenshot-only E2E (Playwright + Electron). It launches the app, walks chrome states, and writes PNGs used by this README.
+
+```bash
+npm install
+npm run test:e2e
+```
+
+Details: [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) and [e2e/README.md](e2e/README.md).
 
 ## License
 This project is licensed under the GNU General Public License version 2.0 (GPL-2.0). See the [LICENSE](LICENSE) file for details.

@@ -1,45 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html class="dark">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; media-src * data: blob: https:; img-src * data: blob: https:; connect-src * data: blob: https:; frame-src * https: data:; child-src * https: data:;">
   <title>Grok Desktop</title>
   <link rel="stylesheet" href="styles.css">
+  <script>
+    (function () {
+      try {
+        if (new URLSearchParams(location.search).get('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      } catch (_) {}
+    })();
+  </script>
   <style>
     :root {
-      --color-text: #000000;
-      --color-bg-toolbar: #F9F8F6;
-      --color-bg-tab: #F9F8F6;
-      --color-bg-tab-active: #ffffff;
-      --color-bg-content: #ffffff;
-      --color-border: #dddddd;
-      --color-hover: #dddddd;
-      --color-aot-border: #cccccc;
-      --color-aot-hover: #e6e6e6;
-      --scrollbar-track: #f1f1f1;
-      --scrollbar-thumb: #c1c1c1;
-      --scrollbar-thumb-hover: #a8a8a8;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --color-text: #e6e6e6;
-        --color-bg-toolbar: #1e1f22;
-        --color-bg-tab: #2b2d31;
-        --color-bg-tab-active: #3b3e45;
-        --color-bg-content: #2b2d31;
-        --color-border: #444444;
-        --color-hover: #444444;
-        --color-aot-border: #555555;
-        --color-aot-hover: #444444;
-        --scrollbar-track: #2a2b2f;
-        --scrollbar-thumb: #55595f;
-        --scrollbar-thumb-hover: #666b73;
-      }
-    }
-
-    /* Also support JS-driven theme toggling via a class */
-    :root.dark {
+      color-scheme: dark;
       --color-text: #e6e6e6;
       --color-bg-toolbar: #1e1f22;
       --color-bg-tab: #2b2d31;
@@ -52,6 +31,22 @@
       --scrollbar-track: #2a2b2f;
       --scrollbar-thumb: #55595f;
       --scrollbar-thumb-hover: #666b73;
+    }
+
+    :root.light {
+      color-scheme: light;
+      --color-text: #000000;
+      --color-bg-toolbar: #F9F8F6;
+      --color-bg-tab: #F9F8F6;
+      --color-bg-tab-active: #ffffff;
+      --color-bg-content: #ffffff;
+      --color-border: #dddddd;
+      --color-hover: #dddddd;
+      --color-aot-border: #cccccc;
+      --color-aot-hover: #e6e6e6;
+      --scrollbar-track: #f1f1f1;
+      --scrollbar-thumb: #c1c1c1;
+      --scrollbar-thumb-hover: #a8a8a8;
     }
 
     /* Basic styling for the tabs */
@@ -346,6 +341,7 @@
   <div id="update-indicator" style="margin-right:8px;font-size:12px;opacity:0.9;cursor:pointer;text-decoration:underline;display:none;"></div>
   <button class="reload-button" id="reload-button" title="Reload current tab"><span class="reload-icon">↻</span></button>
   <button class="aot-button" id="aot-button" title="Always on top">AOT</button>
+  <button class="aot-button" id="theme-btn" style="margin-left:8px;" title="Dark mode (click for light)" aria-pressed="true">D</button>
   <button class="aot-button" id="update-btn" style="margin-left:8px;display:none;background:#ff3333;color:#fff;border-color:#cc0000;" title="Update available">↑</button>
   <button class="aot-button" id="usage-btn" style="margin-left:8px;" title="Toggle Usage Stats">s</button>
   <button class="aot-button" id="info-btn" style="margin-left:8px;" title="About">i</button>
@@ -378,6 +374,9 @@
     // Simple tab management
     const { ipcRenderer } = require('electron');
     const https = require('https');
+    const e2eParams = new URLSearchParams(window.location.search);
+    const isE2E = e2eParams.get('e2e') === '1' || process.env.GROK_E2E === '1';
+    const e2eStartUrl = e2eParams.get('start') || process.env.GROK_E2E_START_URL || '';
     const currentVersionPromise = ipcRenderer.invoke('get-app-version');
 
     function parseTagName(tag) {
@@ -448,13 +447,20 @@
       });
     }
 
-    // Apply theme on message from main
-    ipcRenderer.on('system-theme-updated', (_event, theme) => {
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+    function applyChromeTheme(theme) {
+      const dark = theme !== 'light';
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.classList.toggle('light', !dark);
+      const btn = document.getElementById('theme-btn');
+      if (btn) {
+        btn.textContent = dark ? 'D' : 'L';
+        btn.title = dark ? 'Dark mode (click for light)' : 'Light mode (click for dark)';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
       }
+    }
+
+    ipcRenderer.on('system-theme-updated', (_event, theme) => {
+      applyChromeTheme(theme);
     });
 
     const tabManager = {
@@ -501,11 +507,13 @@
           });
         });
         
-        // Create initial tab
-        this.createTab('https://grok.com');
+        // Create initial tab (E2E can point at a local fixture for stable screenshots)
+        const startUrl = (isE2E && e2eStartUrl) ? e2eStartUrl : 'https://grok.com';
+        this.createTab(startUrl);
 
-        // After initial UI is ready, check for updates
-        checkForUpdate();
+        if (!isE2E) {
+          checkForUpdate();
+        }
 
         // Setup tab scroll buttons visibility and behavior
         this.setupScrollButtons();
@@ -678,7 +686,12 @@
         // Allow internal same-tab nav; open external in browser
         webview.addEventListener('will-navigate', (e) => {
           const url = e.url;
-          const internal = /^https?:\/\/grok\.com(?:\/|$)/.test(url) ||
+          const e2eLocal = isE2E && (
+            url.startsWith('file:') ||
+            /^https?:\/\/(127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/.test(url)
+          );
+          const internal = e2eLocal ||
+                           /^https?:\/\/grok\.com(?:\/|$)/.test(url) ||
                            /^https?:\/\/x\.ai(?:\/|$)/.test(url) ||
                            /^https?:\/\/x\.com(?:\/|$)/.test(url) ||
                            /^https?:\/\/accounts\.x\.ai(?:\/|$)/.test(url) ||
@@ -724,6 +737,26 @@
         const currentIndex = this.tabs.findIndex(t => t.id === this.activeTabId);
         const prevIndex = (currentIndex - 1 + this.tabs.length) % this.tabs.length;
         this.activateTab(this.tabs[prevIndex].id);
+      },
+
+      waitForTabsIdle() {
+        return Promise.all(this.tabs.map((tab) => new Promise((resolve) => {
+          let settled = false;
+          const done = () => {
+            if (settled) return;
+            settled = true;
+            resolve();
+          };
+          try {
+            if (!tab.element.classList.contains('loading')) {
+              done();
+              return;
+            }
+          } catch (_) {}
+          tab.webview.addEventListener('did-stop-loading', done, { once: true });
+          tab.webview.addEventListener('did-fail-load', done, { once: true });
+          setTimeout(done, 20000);
+        })));
       },
 
       reloadActiveTab() {
@@ -1064,13 +1097,53 @@
         document.getElementById('usage-high-effort').textContent = '--';
         document.getElementById('usage-grok4-heavy').textContent = '--';
         document.getElementById('usage-refill-container').style.display = 'none';
+      },
+
+      showMock(data) {
+        this.isActive = true;
+        if (this.button) this.button.classList.add('active');
+        if (this.statusBar) this.statusBar.classList.add('active');
+        document.body.classList.add('usage-bar-active');
+        if (this.refreshInterval) {
+          clearInterval(this.refreshInterval);
+          this.refreshInterval = null;
+        }
+        this.updateDisplay(data);
       }
     };
 
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
+    // Initialize when DOM is loaded (or immediately if the document is already ready)
+    const bootApp = () => {
       tabManager.init();
       usageStats.init();
+
+      if (isE2E) {
+        window.__GROK_E2E__ = {
+          ready: true,
+          createTab: (url) => tabManager.createTab(url || 'https://grok.com'),
+          listTabs: () => tabManager.tabs.map((tab) => ({
+            id: tab.id,
+            title: tab.element.querySelector('.tab-title') ? tab.element.querySelector('.tab-title').textContent : ''
+          })),
+          activateTab: (id) => tabManager.activateTab(id),
+          waitForTabsIdle: () => tabManager.waitForTabsIdle(),
+          showUsage: (data) => usageStats.showMock(data),
+          hideUsage: () => {
+            if (usageStats.isActive) usageStats.toggle();
+          },
+          setAotActive: (active) => {
+            const btn = document.getElementById('aot-button');
+            if (btn) btn.classList.toggle('active', !!active);
+          },
+          toggleAot: () => {
+            const btn = document.getElementById('aot-button');
+            if (btn) btn.click();
+          },
+          setTheme: (theme) => ipcRenderer.invoke('set-theme', theme),
+          getTheme: () => (document.documentElement.classList.contains('light') ? 'light' : 'dark'),
+          openAbout: () => ipcRenderer.invoke('show-app-info')
+        };
+      }
       // Click to open latest release page
       const indicator = document.getElementById('update-indicator');
       if (indicator) {
@@ -1104,7 +1177,26 @@
           }
         });
       }
-    });
+      const themeBtn = document.getElementById('theme-btn');
+      if (themeBtn) {
+        applyChromeTheme(document.documentElement.classList.contains('light') ? 'light' : 'dark');
+        themeBtn.addEventListener('click', async () => {
+          const current = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+          const next = current === 'dark' ? 'light' : 'dark';
+          try {
+            const applied = await ipcRenderer.invoke('set-theme', next);
+            applyChromeTheme(applied);
+          } catch (_) {
+            applyChromeTheme(next);
+          }
+        });
+      }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootApp);
+    } else {
+      bootApp();
+    }
   </script>
 </body>
 </html> 

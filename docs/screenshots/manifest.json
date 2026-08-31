@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-08-31T20:36:48.444Z",
+  "platform": "darwin",
+  "window": {
+    "width": 1280,
+    "height": 800
+  },
+  "shots": [
+    {
+      "file": "01-main-window.png",
+      "caption": "Main window with tab bar, toolbar, and Grok shell",
+      "bytes": 51536
+    },
+    {
+      "file": "02-usage-bar.png",
+      "caption": "Usage stats bar with remaining query counts",
+      "bytes": 65805
+    },
+    {
+      "file": "03-toolbar.png",
+      "caption": "Tab bar and window controls",
+      "bytes": 7850
+    },
+    {
+      "file": "04-multiple-tabs.png",
+      "caption": "Multiple conversation tabs",
+      "bytes": 68321
+    },
+    {
+      "file": "05-tab-overflow.png",
+      "caption": "Overflowing tab strip with scroll controls",
+      "bytes": 67076
+    },
+    {
+      "file": "06-about.png",
+      "caption": "About tab",
+      "bytes": 548012
+    },
+    {
+      "file": "07-aot-active.png",
+      "caption": "Always-on-top control in the active state",
+      "bytes": 548037
+    },
+    {
+      "file": "08-usage-warning.png",
+      "caption": "Usage warning when remaining quota is low",
+      "bytes": 550545
+    },
+    {
+      "file": "09-usage-critical.png",
+      "caption": "Usage critical when remaining quota is nearly exhausted",
+      "bytes": 549894
+    },
+    {
+      "file": "10-light-mode.png",
+      "caption": "Light theme",
+      "bytes": 498811
+    },
+    {
+      "file": "11-dark-mode.png",
+      "caption": "Dark theme",
+      "bytes": 548012
+    },
+    {
+      "file": "12-live-grok.png",
+      "caption": "Live grok.com session (login or home, depending on cookies)",
+      "bytes": 153659
+    }
+  ]
+}

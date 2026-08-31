@@ -6,7 +6,12 @@ You are welcome to fork the repository and make your own changes.
 
 If you make any changes, please share them so I can update the main repository.
 
+```bash
+npm install
+npm start
+npm run test:e2e   # screenshot tour -> docs/screenshots/
+```
+
 Thank you.
 
-R
 

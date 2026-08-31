@@ -50,12 +50,16 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
 
 ### Added
+- Screenshot-only E2E tour (`npm run test:e2e`) that captures the tab bar, usage states, About, AOT, themes, and live grok.com into `docs/screenshots/`
+- **D** / **L** toolbar control to switch between dark (default) and light themes; preference is saved
 - Keyboard shortcuts in the app:
   - Ctrl+T: open new tab
   - Ctrl+Tab / Ctrl+Shift+Tab: cycle through open tabs (next/previous)
   - Ctrl+R reloads the active tab
   - Ctrl+I: open information/about dialog
+
 ### Changed
+- Dark mode is now the default. The app no longer follows the OS color scheme unless you opt into light mode.
 - Update Electron to 39.x (incrementally 36 → 37 → 38 → 39)
 - Use electron-builder via npx in npm scripts (no global install required)
 

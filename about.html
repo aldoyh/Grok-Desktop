@@ -3,86 +3,798 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <title>About</title>
+  <meta name="color-scheme" content="dark light">
+  <title>About Grok Desktop</title>
   <style>
     :root {
-      color-scheme: light dark;
-      --bg: #ffffff;
-      --fg: #111111;
-      --muted: #555555;
-      --border: #dddddd;
-      --button-bg: #f3f4f6;
-      --button-fg: #111111;
-      --accent: #1a73e8;
+      color-scheme: dark;
+      --bg: #0d0e11;
+      --bg-surface: rgba(22, 24, 29, 0.85);
+      --bg-card: rgba(30, 33, 40, 0.7);
+      --bg-card-hover: rgba(38, 42, 51, 0.95);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(96, 165, 250, 0.5);
+      --fg: #f3f4f6;
+      --fg-secondary: #9ca3af;
+      --muted: #6b7280;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-glow: rgba(59, 130, 246, 0.25);
+      --button-bg: #1f232b;
+      --button-hover: #2a2f3a;
+      --button-fg: #f3f4f6;
+      --badge-bg: rgba(255, 255, 255, 0.06);
+      --badge-border: rgba(255, 255, 255, 0.1);
+      --success: #10b981;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1e1f21;
-        --fg: #e8eaed;
-        --muted: #a0a4ab;
-        --border: #3a3b3e;
-        --button-bg: #2a2b2e;
-        --button-fg: #e8eaed;
-        --accent: #8ab4f8;
-      }
+    html.light {
+      color-scheme: light;
+      --bg: #f8fafc;
+      --bg-surface: rgba(255, 255, 255, 0.95);
+      --bg-card: rgba(248, 250, 252, 0.9);
+      --bg-card-hover: #ffffff;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-focus: rgba(37, 99, 235, 0.5);
+      --fg: #0f172a;
+      --fg-secondary: #475569;
+      --muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.15);
+      --button-bg: #f1f5f9;
+      --button-hover: #e2e8f0;
+      --button-fg: #0f172a;
+      --badge-bg: rgba(0, 0, 0, 0.04);
+      --badge-border: rgba(0, 0, 0, 0.08);
+      --success: #059669;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
       background: var(--bg);
       color: var(--fg);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
-      height: 100vh;
-      width: 100vw;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-behavior: smooth;
     }
-    .container {
+
+    /* Ambient background glow */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 480px;
+      background: radial-gradient(circle at 50% -10%, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 36px 24px 60px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      text-align: center;
-      min-height: 100vh;
+      gap: 26px;
     }
-    h1 {
+
+    /* Hero section */
+    .hero-card {
+      position: relative;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 34px 30px 28px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .app-icon-wrapper {
+      position: relative;
+      width: 82px;
+      height: 82px;
+      border-radius: 20px;
+      padding: 5px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-icon-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+    }
+
+    .hero-title-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h1#appName {
       margin: 0;
-      font-size: 32px;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+    }
+
+    .tagline {
+      margin: 0;
+      font-size: 15px;
+      color: var(--fg-secondary);
+      max-width: 520px;
+      line-height: 1.5;
+    }
+
+    .badge-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      color: var(--fg-secondary);
+    }
+
+    .badge-version {
+      color: var(--fg);
       font-weight: 600;
     }
-    p {
-      margin: 0;
-      font-size: 26px;
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+      padding-left: 4px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       color: var(--muted);
     }
-    a {
-      color: var(--accent);
-      text-decoration: none;
+
+    /* Team / Credits Grid */
+    .credits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
     }
-    a:hover {
+
+    .credit-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .credit-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+      background: var(--bg-card-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .avatar-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .avatar-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-wrapper.antigravity-icon-box {
+      background: radial-gradient(circle, rgba(66, 133, 244, 0.15) 0%, rgba(219, 68, 55, 0.05) 100%);
+      padding: 6px;
+    }
+
+    .avatar-wrapper.antigravity-icon-box img {
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(66, 133, 244, 0.4));
+    }
+
+    .avatar-icon-svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+      color: var(--accent);
+    }
+
+    .card-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .role-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+
+    .person-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+    }
+
+    .person-name a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .person-name a:hover {
+      color: var(--accent);
       text-decoration: underline;
     }
-    .actions {
-      margin-top: 37px;
+
+    .person-desc {
+      margin: 0;
+      font-size: 13px;
+      color: var(--fg-secondary);
+      line-height: 1.45;
+    }
+
+    .card-footer {
+      margin-top: auto;
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+    }
+
+    .profile-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      transition: all 0.2s ease;
+    }
+
+    .profile-link-btn:hover {
+      background: var(--button-hover);
+      color: var(--accent-hover);
+      border-color: var(--border-focus);
+    }
+
+    /* Acknowledgement Banner */
+    .shoutout-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--fg-secondary);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .shoutout-card svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: #ec4899;
+    }
+
+    .shoutout-card a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .shoutout-card a:hover {
+      text-decoration: underline;
+    }
+
+    /* Diagnostics & Runtime specs */
+    .specs-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .spec-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .spec-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .spec-value {
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--fg);
+      font-weight: 500;
+    }
+
+    .specs-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Action Buttons Row */
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--button-fg);
+      background: var(--button-bg);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--button-hover);
+      border-color: var(--border-focus);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .action-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      fill: currentColor;
+    }
+
+    .action-btn.btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .action-btn.btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: #ffffff;
+    }
+
+    /* Shortcuts Grid */
+    .shortcuts-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 24px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .shortcut-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+
+    .kbd-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--button-bg);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Compatibility hidden fallback items (preserves existing DOM API IDs) */
+    .compat-line {
+      display: none;
+    }
+
+    /* Toast notification */
+    #copyToast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10b981;
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
       gap: 8px;
     }
-    button {
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--button-bg);
-      color: var(--button-fg);
-      cursor: pointer;
+
+    #copyToast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
-    button:hover {
-      filter: brightness(1.05);
-    }
-    .small {
-      font-size: 24px;
+
+    @media (max-width: 640px) {
+      .wrapper {
+        padding: 20px 14px 40px;
+        gap: 20px;
+      }
+      .hero-card {
+        padding: 24px 18px 20px;
+      }
+      h1#appName {
+        font-size: 26px;
+      }
+      .credits-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Hero Branding Card -->
+    <header class="hero-card">
+      <div class="app-icon-wrapper">
+        <img src="src/grok.png" alt="Grok Desktop Logo" onerror="this.src='assets/icon.svg';">
+      </div>
+      <div class="hero-title-group">
+        <h1 id="appName">Grok Desktop</h1>
+        <p class="tagline">Next-generation desktop client for Grok with multi-tab browsing and real-time usage monitoring.</p>
+        <div class="badge-strip">
+          <span class="badge badge-version" id="version">Version: 1.2.5</span>
+          <span class="badge"><span class="badge-dot"></span> Active Release</span>
+          <span class="badge">ISC Open Source</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="actions-row">
+        <a id="repoLink" class="action-btn btn-primary" href="https://github.com/AnRkey/Grok-Desktop" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          GitHub Repository
+        </a>
+        <a id="contactLink" class="action-btn" href="https://github.com/AnRkey/Grok-Desktop/discussions" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>
+          Discussions
+        </a>
+        <a id="releasesLink" class="action-btn" href="https://github.com/AnRkey/Grok-Desktop/releases" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          Releases
+        </a>
+        <a id="issuesLink" class="action-btn" href="https://github.com/AnRkey/Grok-Desktop/issues" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          Report Issue
+        </a>
+      </div>
+    </header>
+
+    <!-- Engineering & Credits Showcase -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">Core Development & Engineering</span>
+      </div>
+
+      <div class="credits-grid" style="margin-top: 12px;">
+        <!-- Card 1: Original Developer AnRkey -->
+        <article class="credit-card">
+          <div class="card-top">
+            <div class="avatar-wrapper">
+              <svg class="avatar-icon-svg" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <div class="card-header-text">
+              <span class="role-badge">Original Developer</span>
+              <h3 class="person-name">
+                <a id="developerLink" href="https://github.com/AnRkey" target="_blank" rel="noopener">AnRkey</a>
+              </h3>
+            </div>
+          </div>
+          <p class="person-desc">
+            Founder and creator of the Grok-Desktop project. Architected the initial multi-tab wrapper, navigation controls, and cross-platform packaging.
+          </p>
+          <div class="card-footer">
+            <a class="profile-link-btn" href="https://github.com/AnRkey" target="_blank" rel="noopener">
+              <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              @AnRkey
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 2: Enhancement & Maintenance Hasan AlDoy -->
+        <article class="credit-card">
+          <div class="card-top">
+            <div class="avatar-wrapper">
+              <svg class="avatar-icon-svg" viewBox="0 0 24 24">
+                <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65A.488.488 0 0 0 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+              </svg>
+            </div>
+            <div class="card-header-text">
+              <span class="role-badge">Enhancements & Maintenance</span>
+              <h3 class="person-name">
+                <a id="maintainerLink" href="https://github.com/aldoyh" target="_blank" rel="noopener">Hasan AlDoy</a>
+              </h3>
+            </div>
+          </div>
+          <p class="person-desc">
+            Spearheaded UI/UX modernizations, Grok usage metrics monitor integration, keyboard navigation, and ongoing maintenance.
+          </p>
+          <div class="card-footer">
+            <a class="profile-link-btn" href="https://github.com/aldoyh" target="_blank" rel="noopener">
+              <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              @aldoyh
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 3: AI Pair Programmer Antigravity -->
+        <article class="credit-card">
+          <div class="card-top">
+            <div class="avatar-wrapper antigravity-icon-box">
+              <img src="assets/antigravity.png" alt="Antigravity Logo" onerror="this.src='src/antigravity.png';">
+            </div>
+            <div class="card-header-text">
+              <span class="role-badge" style="color: #60a5fa;">AI Pair Programmer</span>
+              <h3 class="person-name">
+                <a id="aiLink" href="https://deepmind.google/" target="_blank" rel="noopener">Antigravity</a>
+              </h3>
+            </div>
+          </div>
+          <p class="person-desc">
+            Built by Google DeepMind. Autonomous AI pair programming assistant powering automated refactoring, tests, and UI craftsmanship.
+          </p>
+          <div class="card-footer">
+            <a class="profile-link-btn" href="https://deepmind.google/" target="_blank" rel="noopener">
+              <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              Google DeepMind
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Community Shoutout -->
+    <div class="shoutout-card">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      <div>
+        Special thanks to <a href="https://github.com/JoshuaWang2211" target="_blank" rel="noopener"><strong>Joshua Wang</strong></a> for inspiring the Grok Usage Watch rate-limit monitoring integration.
+      </div>
+    </div>
+
+    <!-- Runtime Specifications & Diagnostics -->
+    <section class="specs-card">
+      <div class="section-header" style="margin: 0; padding: 0;">
+        <span class="section-title">Environment & Runtime Specifications</span>
+      </div>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <span class="spec-label">Electron</span>
+          <span class="spec-value" id="electronSpec">Loading...</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Chromium</span>
+          <span class="spec-value" id="chromeSpec">Loading...</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Node.js</span>
+          <span class="spec-value" id="nodeSpec">Loading...</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Platform</span>
+          <span class="spec-value" id="platformSpec">Loading...</span>
+        </div>
+      </div>
+
+      <div class="specs-footer">
+        <span style="font-size: 12px; color: var(--muted);">Engineered with modern web standards and native desktop APIs.</span>
+        <button id="copyDiagnosticsBtn" class="action-btn" style="padding: 6px 12px; font-size: 12px;">
+          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          Copy System Info
+        </button>
+      </div>
+    </section>
+
+    <!-- Keyboard Shortcuts Cheat Sheet -->
+    <section class="shortcuts-card">
+      <div class="section-header" style="margin: 0; padding: 0;">
+        <span class="section-title">Keyboard Shortcuts</span>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-row">
+          <span>Open new conversation tab</span>
+          <span class="kbd-tag" id="shortcutNewTab">Ctrl+T</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Cycle forward through tabs</span>
+          <span class="kbd-tag" id="shortcutNextTab">Ctrl+Tab</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Cycle backward through tabs</span>
+          <span class="kbd-tag" id="shortcutPrevTab">Ctrl+Shift+Tab</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Reload active tab</span>
+          <span class="kbd-tag" id="shortcutReload">Ctrl+R</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Focus search query</span>
+          <span class="kbd-tag" id="shortcutSearch">Ctrl+K</span>
+        </div>
+        <div class="shortcut-row">
+          <span>Show About dialog</span>
+          <span class="kbd-tag" id="shortcutAbout">Ctrl+I</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hidden compatibility elements for existing DOM selectors if any -->
+    <div class="compat-line">
+      <p class="small" id="developerLine">Developer: <span>AnRkey</span></p>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="copyToast">
+    <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    <span>System info copied to clipboard!</span>
+  </div>
+
   <script>
     (function() {
       function getParam(name, fallback) {
@@ -93,68 +805,133 @@
           return fallback;
         }
       }
-      window.addEventListener('DOMContentLoaded', function() {
-        const name = getParam('name', 'Grok Desktop');
-        const version = getParam('version', '0.0.0');
-        const repo = getParam('repo', 'https://github.com/AnRkey/Grok-Desktop');
-        const developer = getParam('developer', '');
-        const contact = getParam('contact', '');
-        document.getElementById('appName').textContent = name;
-        document.getElementById('version').textContent = 'Version: ' + version;
-        (function() {
-          const devEl = document.getElementById('developerLink');
-          let devName = developer;
-          if (!devName) {
-            try {
-              const m = repo.match(/^https?:\/\/github\.com\/([^/]+)/i);
-              if (m && m[1]) devName = m[1];
-            } catch (_) {}
-          }
-          if (devEl) {
-            if (devName) devEl.textContent = devName;
-            const href = devName ? ('https://github.com/' + devName) : 'https://github.com';
-            devEl.href = href;
-            devEl.setAttribute('target', '_blank');
-            devEl.setAttribute('rel', 'noopener');
-          }
-        })();
-        const link = document.getElementById('repoLink');
-        link.href = repo;
-        // The main process intercepts navigation/window open and opens the URL externally
-        // Setting target=_blank helps trigger that handler for best compatibility
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener');
-        const contactLink = document.getElementById('contactLink');
-        let contactHref = contact;
-        if (!contactHref) {
-          // Derive contact from repo owner
-          try {
-            const m = repo.match(/^https?:\/\/github\.com\/([^/]+)/i);
-            if (m && m[1]) contactHref = 'https://github.com/' + m[1];
-          } catch (_) {}
+
+      function syncThemeClass() {
+        const urlTheme = getParam('theme', '');
+        let light = false;
+        if (urlTheme === 'light') {
+          light = true;
+        } else if (urlTheme === 'dark') {
+          light = false;
+        } else {
+          light = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
         }
-        if (contactHref) {
-          contactLink.href = contactHref;
-          contactLink.setAttribute('target', '_blank');
-          contactLink.setAttribute('rel', 'noopener');
+        document.documentElement.classList.toggle('light', !!light);
+        document.documentElement.classList.toggle('dark', !light);
+      }
+
+      syncThemeClass();
+      try {
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', syncThemeClass);
+      } catch (_) {}
+
+      window.addEventListener('DOMContentLoaded', function() {
+        // App meta
+        const name = getParam('name', 'Grok Desktop');
+        const version = getParam('version', '1.2.5');
+        const repo = getParam('repo', 'https://github.com/AnRkey/Grok-Desktop');
+        const developer = getParam('developer', 'AnRkey');
+        const contact = getParam('contact', 'https://github.com/AnRkey/Grok-Desktop/discussions');
+        const maintainer = getParam('maintainer', 'Hasan AlDoy');
+        const maintainerRepo = getParam('maintainerRepo', 'https://github.com/aldoyh');
+        
+        // Runtime specs
+        const electronVer = getParam('electron', (typeof process !== 'undefined' && process.versions && process.versions.electron) ? process.versions.electron : 'v39.1.2');
+        const chromeVer = getParam('chrome', (typeof process !== 'undefined' && process.versions && process.versions.chrome) ? process.versions.chrome : 'v134.0');
+        const nodeVer = getParam('node', (typeof process !== 'undefined' && process.versions && process.versions.node) ? process.versions.node : 'v22.14.0');
+        const platform = getParam('platform', (typeof navigator !== 'undefined' && navigator.platform) ? navigator.platform : 'Desktop');
+
+        // Populate DOM
+        const appNameEl = document.getElementById('appName');
+        if (appNameEl) appNameEl.textContent = name;
+
+        const versionEl = document.getElementById('version');
+        if (versionEl) versionEl.textContent = 'Version: ' + version;
+
+        // Developer Link
+        const devEl = document.getElementById('developerLink');
+        if (devEl) {
+          devEl.textContent = developer;
+          devEl.href = 'https://github.com/' + developer;
+        }
+
+        // Maintainer Link
+        const maintainerEl = document.getElementById('maintainerLink');
+        if (maintainerEl) {
+          maintainerEl.textContent = maintainer;
+          maintainerEl.href = maintainerRepo;
+        }
+
+        // Repository Link
+        const repoEl = document.getElementById('repoLink');
+        if (repoEl) repoEl.href = repo;
+
+        // Contact Link
+        const contactEl = document.getElementById('contactLink');
+        if (contactEl) contactEl.href = contact;
+
+        // Populate specs
+        document.getElementById('electronSpec').textContent = electronVer.startsWith('v') ? electronVer : ('v' + electronVer);
+        document.getElementById('chromeSpec').textContent = chromeVer.startsWith('v') ? chromeVer : ('v' + chromeVer);
+        document.getElementById('nodeSpec').textContent = nodeVer.startsWith('v') ? nodeVer : ('v' + nodeVer);
+        document.getElementById('platformSpec').textContent = platform;
+
+        // Adjust shortcuts for macOS if applicable
+        const isMac = platform.toLowerCase().includes('mac') || (navigator.userAgent && navigator.userAgent.includes('Mac'));
+        if (isMac) {
+          const mod = '⌘';
+          const setKbd = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+          };
+          setKbd('shortcutNewTab', mod + '+T');
+          setKbd('shortcutNextTab', 'Ctrl+Tab');
+          setKbd('shortcutPrevTab', 'Ctrl+Shift+Tab');
+          setKbd('shortcutReload', mod + '+R');
+          setKbd('shortcutSearch', mod + '+K');
+          setKbd('shortcutAbout', mod + '+I');
+        }
+
+        // Copy system diagnostics
+        const copyBtn = document.getElementById('copyDiagnosticsBtn');
+        const toast = document.getElementById('copyToast');
+
+        if (copyBtn) {
+          copyBtn.addEventListener('click', function() {
+            const diagnostics = [
+              `${name} v${version}`,
+              `Original Developer: ${developer} (https://github.com/${developer})`,
+              `Lead Enhancements: ${maintainer} (${maintainerRepo})`,
+              `AI Co-Engineer: Antigravity (Google DeepMind)`,
+              `Electron: ${electronVer}`,
+              `Chromium: ${chromeVer}`,
+              `Node.js: ${nodeVer}`,
+              `Platform: ${platform}`,
+              `Repository: ${repo}`
+            ].join('\n');
+
+            navigator.clipboard.writeText(diagnostics).then(function() {
+              if (toast) {
+                toast.classList.add('visible');
+                setTimeout(() => toast.classList.remove('visible'), 2400);
+              }
+            }).catch(function() {
+              // Fallback
+              const ta = document.createElement('textarea');
+              ta.value = diagnostics;
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand('copy');
+              document.body.removeChild(ta);
+              if (toast) {
+                toast.classList.add('visible');
+                setTimeout(() => toast.classList.remove('visible'), 2400);
+              }
+            });
+          });
         }
       });
     })();
   </script>
-  <!-- Keep styles/scripts light; page should render fast as a modal -->
-  <!-- This page adapts to OS theme via prefers-color-scheme and color-scheme -->
-</head>
-<body>
-  <div class="container">
-    <h1 id="appName">Grok Desktop</h1>
-    <p class="small" id="version">Version: 0.0.0</p>
-    <p class="small" id="developerLine">Developer: <a id="developerLink" href="#">AnRkey</a></p>
-    <p><a id="repoLink" href="#">GitHub Repository</a></p>
-    <p><a id="contactLink" href="#">Discussion Forums</a></p>
-  </div>
-  <!-- No external resources to keep it robust offline -->
-  <!-- End -->
-  </body>
+</body>
 </html>
-
-
